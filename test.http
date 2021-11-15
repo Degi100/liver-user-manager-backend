@@ -4,5 +4,5 @@ GET {{url}}
 content-type: application/json
 
 ### delete a user
-DELETE {{url}}/deleteuser/6192334e2d1b2504f6682690
+DELETE {{url}}/deleteuser/6192334e2d1b2504f6682691
 content-type: application/json
