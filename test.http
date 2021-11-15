@@ -1,0 +1,8 @@
+@url = http://localhost:3022
+
+GET {{url}} 
+content-type: application/json
+
+### delete a user
+DELETE {{url}}/deleteuser/6192334e2d1b2504f6682690
+content-type: application/json
