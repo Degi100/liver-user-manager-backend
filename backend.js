@@ -7,6 +7,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3022;
+console.log(port)
 const mongoConnectionString = process.env.MONGODB_URI;
 const client = new MongoClient(mongoConnectionString);
 
