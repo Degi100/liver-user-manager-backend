@@ -16,31 +16,30 @@ app.use(cors());
 
 const execMongo = async (done) => {
   await client.connect();
-  const db = client.db("api001");
+  const db = client.db("users100");
   done(db);
 };
 
 app.get("/", (req, res) => {
-  res.json({message: "hello"});
-  // execMongo(async (db) => {
-  //   const users = await db
-  //     .collection("users100")
-  //     .find()
-  //     .project({
-  //       name: 1,
-  //       username: 1,
-  //       email: 1,
-  //     })
-  //     .toArray();
-  //   res.json(users);
-  // });
+  execMongo(async (db) => {
+    const users = await db
+      .collection("usersdata")
+      .find()
+      .project({
+        name: 1,
+        username: 1,
+        email: 1,
+      })
+      .toArray();
+    res.json(users);
+  });
 });
 
 app.delete("/deleteuser/:id", (req, res) => {
   const id = req.params.id;
   execMongo(async (db) => {
     const deleteResult = await db
-      .collection("users100")
+      .collection("usersdata")
       .deleteOne({ _id: new mongodb.ObjectId(id) });
     res.json({
       result: deleteResult,
@@ -51,7 +50,7 @@ app.delete("/deleteuser/:id", (req, res) => {
 app.post("/adduser", (req, res) => {
   const user = req.body.user;
   execMongo(async (db) => {
-    const insertResult = await db.collection("user100").insertOne(user);
+    const insertResult = await db.collection("usersdata").insertOne(user);
     res.json({
       result: insertResult,
     });
@@ -64,7 +63,7 @@ app.patch("/edituser/:id", (req, res) => {
   console.log(email);
   execMongo(async (db) => {
     const updateResult = await db
-      .collection("users100")
+      .collection("usersdata")
       .updateOne({ _id: new mongodb.ObjectId(id) }, { $set: { email } });
     res.json({
       result: updateResult,
