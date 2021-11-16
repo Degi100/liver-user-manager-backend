@@ -21,18 +21,19 @@ const execMongo = async (done) => {
 };
 
 app.get("/", (req, res) => {
-  execMongo(async (db) => {
-    const users = await db
-      .collection("users100")
-      .find()
-      .project({
-        name: 1,
-        username: 1,
-        email: 1,
-      })
-      .toArray();
-    res.json(users);
-  });
+  res.json({message: "hello"});
+  // execMongo(async (db) => {
+  //   const users = await db
+  //     .collection("users100")
+  //     .find()
+  //     .project({
+  //       name: 1,
+  //       username: 1,
+  //       email: 1,
+  //     })
+  //     .toArray();
+  //   res.json(users);
+  // });
 });
 
 app.delete("/deleteuser/:id", (req, res) => {
