@@ -6,3 +6,24 @@ content-type: application/json
 ### delete a user
 DELETE {{url}}/deleteuser/6192334e2d1b2504f6682691
 content-type: application/json
+
+### add a user
+POST {{url}}/adduser
+content-type: application/json
+
+{
+	"user": {
+		"name": "Jim Knopf",
+		"username": "JK",
+		"email": "jk@user.de"
+	}
+}
+
+### update a user
+
+PATCH {{url}}/edituser/6192334e2d1b2504f6682692
+content-type: application/json
+
+{
+	"email": "jk@gogogooglg.de"
+}

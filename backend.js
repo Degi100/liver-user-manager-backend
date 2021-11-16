@@ -1,10 +1,17 @@
 import express from "express";
 import mongodb, { MongoClient } from "mongodb";
+import cors from "cors";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
-const port = 3022;
-const mongoConnectionString = "mongodb://localhost:27017";
+const port = process.env.PORT || 3022;
+const mongoConnectionString = process.env.MONGODB_URI;
 const client = new MongoClient(mongoConnectionString);
+
+app.use(express.json());
+app.use(cors());
 
 const execMongo = async (done) => {
   await client.connect();
@@ -30,11 +37,35 @@ app.get("/", (req, res) => {
 app.delete("/deleteuser/:id", (req, res) => {
   const id = req.params.id;
   execMongo(async (db) => {
-    const deleteResault = await db
+    const deleteResult = await db
       .collection("users100")
       .deleteOne({ _id: new mongodb.ObjectId(id) });
     res.json({
-      result: deleteResault,
+      result: deleteResult,
+    });
+  });
+});
+
+app.post("/adduser", (req, res) => {
+  const user = req.body.user;
+  execMongo(async (db) => {
+    const insertResult = await db.collection("user100").insertOne(user);
+    res.json({
+      result: insertResult,
+    });
+  });
+});
+
+app.patch("/edituser/:id", (req, res) => {
+  const id = req.params.id;
+  const email = req.body.email;
+  console.log(email);
+  execMongo(async (db) => {
+    const updateResult = await db
+      .collection("users100")
+      .updateOne({ _id: new mongodb.ObjectId(id) }, { $set: { email } });
+    res.json({
+      result: updateResult,
     });
   });
 });
