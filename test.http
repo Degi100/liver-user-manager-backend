@@ -1,5 +1,6 @@
 @url = http://localhost:3022
 
+### GET
 GET {{url}} 
 content-type: application/json
 
