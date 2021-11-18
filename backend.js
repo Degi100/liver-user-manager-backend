@@ -72,5 +72,5 @@ app.patch("/edituser/:id", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`listingen on port ${port}`);
+  console.log(`listen on port ${port}`);
 });
