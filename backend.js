@@ -25,6 +25,7 @@ app.get("/", (req, res) => {
     const users = await db
       .collection("users100")
       .find()
+      .sort({_id:-1})
       .project({
         name: 1,
         username: 1,
