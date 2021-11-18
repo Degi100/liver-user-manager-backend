@@ -11,14 +11,30 @@ console.log(port)
 const mongoConnectionString = process.env.MONGODB_URI;
 const client = new MongoClient(mongoConnectionString);
 
+const uriIsAllowed = function (req, res, next) {
+	const referer = req.headers.referer;
+	const host = `http://${req.headers.host}`;
+	let frontendUri = referer;
+	if (frontendUri === undefined) {
+		frontendUri = host;
+	}
+	if (frontendUri === undefined || !frontendUri.startsWith(process.env.ALLOWED_FRONTEND_URI)) {
+		res.status(403).send('access from this uri is not allowed');
+	} else {
+		next();
+	}
+}
+
 app.use(express.json());
 app.use(cors());
+app.use(uriIsAllowed);
 
 const execMongo = async (done) => {
   await client.connect();
   const db = client.db("api001");
   done(db);
 };
+
 
 app.get("/", (req, res) => {
   execMongo(async (db) => {
