@@ -1,90 +1,82 @@
 import express from "express";
-import mongodb, { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3022;
-console.log(port)
-const mongoConnectionString = process.env.MONGODB_URI;
-const client = new MongoClient(mongoConnectionString);
+const mongoConnectString = process.env.MONGODB_URI;
+mongoose.connect(mongoConnectString);
 
 const uriIsAllowed = function (req, res, next) {
-	const referer = req.headers.referer;
-	const host = `http://${req.headers.host}`;
-	let frontendUri = referer;
-	if (frontendUri === undefined) {
-		frontendUri = host;
-	}
-	if (frontendUri === undefined || !frontendUri.startsWith(process.env.ALLOWED_FRONTEND_URI)) {
-		res.status(403).send('access from this uri is not allowed');
-	} else {
-		next();
-	}
-}
+  const referer = req.headers.referer;
+  const host = `http://${req.headers.host}`;
+  let frontendUri = referer;
+  if (frontendUri === undefined) {
+    frontendUri = host;
+  }
+  if (
+    frontendUri === undefined ||
+    !frontendUri.startsWith(process.env.ALLOWED_FRONTEND_URI)
+  ) {
+    res.status(403).send("access from this uri is not allowed");
+  } else {
+    next();
+  }
+};
+
+const userSchema = mongoose.Schema({
+  name: String,
+  username: String,
+  email: String,
+});
+const UserModel = mongoose.model("User", userSchema, "users100");
 
 app.use(express.json());
 app.use(cors());
 app.use(uriIsAllowed);
 
-const execMongo = async (done) => {
-  await client.connect();
-  const db = client.db("api001");
-  done(db);
-};
-
-
-app.get("/", (req, res) => {
-  execMongo(async (db) => {
-    const users = await db
-      .collection("users100")
-      .find()
-      .sort({_id:-1})
-      .project({
-        name: 1,
-        username: 1,
-        email: 1,
-      })
-      .toArray();
-    res.json(users);
-  });
+app.get("/", async (req, res) => {
+  const users = await UserModel.find({}).select("name username email").sort({_id: -1});
+  res.json(users);
 });
 
-app.delete("/deleteuser/:id", (req, res) => {
+app.delete("/deleteuser/:id", async (req, res) => {
   const id = req.params.id;
-  execMongo(async (db) => {
-    const deleteResult = await db
-      .collection("users100")
-      .deleteOne({ _id: new mongodb.ObjectId(id) });
-    res.json({
-      result: deleteResult,
-    });
+  const deleteResult = await UserModel.deleteOne({
+    _id: new mongoose.Types.ObjectId(id),
+  });
+  res.json({
+    result: deleteResult,
   });
 });
 
 app.post("/adduser", (req, res) => {
   const user = req.body.user;
-  execMongo(async (db) => {
-    const insertResult = await db.collection("users100").insertOne(user);
-    res.json({
-      result: insertResult,
-    });
+  const user1 = new UserModel(user);
+  user1.save((err) => {
+    if (err) {
+      res.status(500).send({ err });
+    } else {
+      res.json({
+        userAdded: user1,
+      });
+    }
   });
 });
 
-app.patch("/edituser/:id", (req, res) => {
+app.patch("/edituser/:id", async (req, res) => {
   const id = req.params.id;
   const email = req.body.email;
-  console.log(email);
-  execMongo(async (db) => {
-    const updateResult = await db
-      .collection("users100")
-      .updateOne({ _id: new mongodb.ObjectId(id) }, { $set: { email } });
-    res.json({
-      result: updateResult,
-    });
+  const updateResult = await UserModel.findOneAndUpdate(
+    { _id: new mongoose.Types.ObjectId(id) },
+    { $set: { email } },
+    { new: true }
+  );
+  res.json({
+    result: updateResult,
   });
 });
 
